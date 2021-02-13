@@ -11,7 +11,7 @@ namespace lol_dodge_alert
         /// <summary>
         /// Set your file path here
         /// </summary>
-        public static string path = @"C:\Users\Błażej\Desktop\zgloszeni gracze.txt";
+        public static string path = "YOUR PATH HERE";
 
         /// <summary>
         /// General variables (do not modify)
