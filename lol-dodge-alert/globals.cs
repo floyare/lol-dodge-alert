@@ -11,12 +11,11 @@ namespace lol_dodge_alert
         /// <summary>
         /// Set your file path here
         /// </summary>
-        public static string path = "YOUR PATH HERE";
+        public static string path = @"C:\Users\Błażej\Desktop\zgloszeni gracze.txt";
 
         /// <summary>
         /// General variables (do not modify)
         /// </summary>
-        public static string blacklist_nickname;
-        public static string blacklist_details;
+        public static bool should_dodge;
     }
 }
