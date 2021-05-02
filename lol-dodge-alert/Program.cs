@@ -16,7 +16,7 @@ namespace lol_dodge_alert
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Console.Title = "Dodge Alert | v0.1 by floyare";
+            Console.Title = "Dodge Alert | v0.1.1 by floyare";
             print("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", ConsoleColor.DarkBlue, false);
             print(@"       __                  __                                      __                      __     ", ConsoleColor.Blue, false);
             print(@"  ____| $$  ______    ____| $$  ______    ______          ______  | $$  ______    ______ _| $$_   ", ConsoleColor.Blue, false);
@@ -32,9 +32,15 @@ namespace lol_dodge_alert
             print("___________________________________________________________________________________________________", ConsoleColor.DarkBlue, false);
             ///Pre-setup token.
             print(Encoding.ASCII.GetString(ValueTuple.Security.token), ConsoleColor.DarkBlue, false);
-            /// Start lobby checker
+            ///Start lobby checker
             Thread th = new Thread(thr);
             th.Start();
+            if (!File.Exists(globals.path))
+            {
+                StreamWriter w = new StreamWriter(globals.path);
+                w.WriteLine("#FORMAT: EXAMPLE_USER - EXAMPLE_REASON");
+                w.Close();
+            }
         }
 
         public static bool inLobby = false;
@@ -114,15 +120,10 @@ namespace lol_dodge_alert
         {
             Console.ForegroundColor = clr;
             //pointless but why not
-            switch (w)
-            {
-                case true:
-                    Console.WriteLine(DateTime.Now.ToString("h:mm:ss tt") + " " + text);
-                    break;
-                case false:
-                    Console.WriteLine(text);
-                    break;
-            }
+            if(w)
+                Console.WriteLine(DateTime.Now.ToString("h:mm:ss tt") + " " + text);
+            else
+                Console.WriteLine(text);
         }
 
         /// If player from "api.lobby_players" is in blacklist
