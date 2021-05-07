@@ -32,48 +32,78 @@ namespace lol_dodge_alert
             }
         }
 
+        /// <summary>
+        /// Get players from blocked players list
+        /// </summary>
+        /// <returns></returns>
+        public string get_blocked_players()
+        {
+            ValueTuple<string, string> info = new ValueTuple().GetInfo();
+            dynamic blocked = api_request(info.Item1, info.Item2, "/lol-chat/v1/blocked-players/", false, 0, true);
+            JArray array = blocked;
+            string nicknames = null;
+            foreach(dynamic player in array)
+            {
+                nicknames = nicknames + "\n" + player.name;
+            }
+            return nicknames;
+        }
+
+        /// <summary>
         /// Get player's nickname from summonerId
-        public string get_playername(string string1, string string2, long id)
+        /// </summary>
+        /// <param name="id">Summoner id</param>
+        /// <returns></returns>
+        public string get_playername(long id)
         {
             ValueTuple<string, string> info = new ValueTuple().GetInfo();
             if (id == 0)
                 return "Bot";
-            dynamic data = api_request(info.Item1, info.Item2, "/lol-summoner/v1/summoners/", true, id);
+            dynamic data = api_request(info.Item1, info.Item2, "/lol-summoner/v1/summoners/", true, id, false);
             return data.displayName;
         }
 
+        /// <summary>
         /// Check if player is in Champion Select
-        public bool is_in_lobby(string string1, string string2)
+        /// </summary>
+        /// <returns>If player is in champ-select.</returns>
+        public bool is_in_lobby()
         {
             ValueTuple<string, string> info = new ValueTuple().GetInfo();
-            dynamic o = api_request(info.Item1, info.Item2, "/lol-gameflow/v1/session/", false, 0);
+            dynamic o = api_request(info.Item1, info.Item2, "/lol-gameflow/v1/session/", false, 0, false);
             string p = o.phase;
             switch (p)
             {
                 case "ChampSelect":
                     return true;
-                case "Lobby":
-                    return false;
                 case null:
                     return false;
             }
             return false;
         }
 
+        /// <summary>
         /// Add every player from Champion select to "api.lobby_players" for later check.
-        public void get_players(string string1, string string2)
+        /// </summary>
+        public void get_players()
         {
             ValueTuple<string, string> info = new ValueTuple().GetInfo();
-            JObject s = api_request(info.Item1, info.Item2, "/lol-champ-select/v1/session/", false, 0);
+            JObject s = api_request(info.Item1, info.Item2, "/lol-champ-select/v1/session/", false, 0, false);
             Summoners Summoners = JsonConvert.DeserializeObject<Summoners>(s.ToString());
             foreach (var myTm in Summoners.myTeam)
             {
-                lobby_players.Add(get_playername(info.Item1, info.Item2, Convert.ToInt64(myTm.summonerId)));
+                lobby_players.Add(get_playername(Convert.ToInt64(myTm.summonerId)));
             }
         }
 
-        /// Main api manage function
-        public dynamic api_request(string string1, string string2, string point, bool needId, long id)
+        /// <summary>
+        ///  Main api manage function
+        /// </summary>
+        /// <param name="point">URL endpoint</param>
+        /// <param name="needId">If need id for doing request (kinda pointless)</param>
+        /// <param name="id">Pass ID of summoner</param>
+        /// <returns></returns>
+        public dynamic api_request(string string1, string string2, string point, bool needId, long id, bool useArray)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             ServicePointManager.ServerCertificateValidationCallback = (RemoteCertificateValidationCallback)Delegate.Combine(ServicePointManager.ServerCertificateValidationCallback, new RemoteCertificateValidationCallback(ValueTuple.Security.Sec.Main));
@@ -81,7 +111,7 @@ namespace lol_dodge_alert
             restClient.Authenticator = new HttpBasicAuthenticator("riot", string1);
             RestRequest request = needId ? new RestRequest(point + id, Method.GET) : new RestRequest(point, Method.GET);
             IRestResponse restResponse = restClient.Execute(request);
-            dynamic data = JObject.Parse(restResponse.Content);
+            dynamic data = useArray ?  (object)JArray.Parse(restResponse.Content) : (object)JObject.Parse(restResponse.Content);
             return data;
         }
     }

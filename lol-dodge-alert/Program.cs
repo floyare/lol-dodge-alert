@@ -16,7 +16,7 @@ namespace lol_dodge_alert
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Console.Title = "Dodge Alert | v0.1.1 by floyare";
+            Console.Title = "Dodge Alert | v0.1.3 by floyare";
             print("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", ConsoleColor.DarkBlue, false);
             print(@"       __                  __                                      __                      __     ", ConsoleColor.Blue, false);
             print(@"  ____| $$  ______    ____| $$  ______    ______          ______  | $$  ______    ______ _| $$_   ", ConsoleColor.Blue, false);
@@ -50,10 +50,8 @@ namespace lol_dodge_alert
         {
             while (true)
             {
-                /// Get Riot auth
-                ValueTuple<string, string> info = new ValueTuple().GetInfo();
                 /// If player is in Champion Select
-                if (api.is_in_lobby(info.Item1, info.Item2))
+                if (api.is_in_lobby())
                 {
                     /// Variable for after match check.
                     aftermatch = true;
@@ -64,7 +62,7 @@ namespace lol_dodge_alert
                         {
                             print("| Lobby Found!", ConsoleColor.White, true);
                             /// Download player list and store them in "api.lobby_players"
-                            api.get_players(info.Item1, info.Item2);
+                            api.get_players();
                             print("| Got player names gained!", ConsoleColor.White, true);
                             ///After collecting players check if any of them are on blacklist
                             should_dodge(globals.path);
@@ -137,9 +135,17 @@ namespace lol_dodge_alert
                 IEnumerable<string> results = lines.Where(l => l.StartsWith(item));
                 string result = lines.SingleOrDefault(l => l.StartsWith(item));
                 string[] textLines = File.ReadAllLines(path);
+                ///Check blocked players if there is someone of these in lobby
+                if (api.get_blocked_players().Contains(item))
+                {
+                    ///Add player to "blacklist in session" list (support for multiple blacklisted players in one lobby)
+                    blacklisted_in_session.Add(new Tuple<string, string>(item, "PLAYER FROM BLOCKLIST"));
+                    globals.should_dodge = true;
+                    break;
+                }
                 foreach (string line in textLines.Where(l => l.StartsWith(item)))
                 {
-                    /// If someone from Champion select is from blacklist
+                    /// If someone from Champion select is from blacklist or in blocked players list.
                     if (api.lobby_players.Contains(item))
                     {
                         string s = line.Replace(item + " - ", "");
