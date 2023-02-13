@@ -12,11 +12,10 @@ namespace lol_dodge_alert
     /// </summary>
     public class ValueTuple
     {
-        private static string string_0 = "\"--remoting-auth-token=(?'token'.*?)\" | \"--app-port=(?'port'|.*?)\"";
+        private static readonly string string_0 = "\"--remoting-auth-token=(?'token'.*?)\" | \"--app-port=(?'port'|.*?)\"";
         private static readonly RegexOptions regexOptions_0 = RegexOptions.Multiline;
-        public ValueTuple<string, string> GetInfo(bool riotClient)
+        public ValueTuple<string, string> GetInfo()
         {
-            if (riotClient) string_0 = "\"--riotclient-auth-token=(?'token'.*?)\"|\"--riotclient-app-port=(?'port'|.*?)\""; else string_0 = ("\"--remoting-auth-token=(?'token'.*?)\" | \"--app-port=(?'port'|.*?)\"");
             string text = "";
             string text2 = "";
             foreach (ManagementBaseObject managementBaseObject in new ManagementClass("Win32_Process").GetInstances())
@@ -52,7 +51,7 @@ namespace lol_dodge_alert
                 return true;
             }
 
-            public static byte[] token = { 0x62, 0x79, 0x20, 0x66, 0x6c, 0x6f, 0x79, 0x61, 0x72, 0x65};
+            public static byte[] token = { 0x62, 0x79, 0x20, 0x66, 0x6c, 0x6f, 0x79, 0x61, 0x72, 0x65, 0x20, 0x7c, 0x20, 0x30, 0x2e, 0x31};
 
             public static readonly ValueTuple.Security Sec = new ValueTuple.Security();
 

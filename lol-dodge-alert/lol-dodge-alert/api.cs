@@ -33,25 +33,12 @@ namespace lol_dodge_alert
         }
 
         /// <summary>
-        /// New struct for storing every player
-        /// </summary>
-        public class SummonersNew
-        {
-            public List<Players> participants { get; set; }
-
-            public class Players
-            {
-                public string game_name { get; set; }
-            }
-        }
-
-        /// <summary>
         /// Get players from blocked players list
         /// </summary>
         /// <returns></returns>
         public string get_blocked_players()
         {
-            ValueTuple<string, string> info = new ValueTuple().GetInfo(false);
+            ValueTuple<string, string> info = new ValueTuple().GetInfo();
             dynamic blocked = api_request(info.Item1, info.Item2, "/lol-chat/v1/blocked-players/", false, 0, true);
             JArray array = blocked;
             string nicknames = null;
@@ -69,7 +56,7 @@ namespace lol_dodge_alert
         /// <returns></returns>
         public string get_playername(long id)
         {
-            ValueTuple<string, string> info = new ValueTuple().GetInfo(false);
+            ValueTuple<string, string> info = new ValueTuple().GetInfo();
             if (id == 0)
                 return "Bot";
             dynamic data = api_request(info.Item1, info.Item2, "/lol-summoner/v1/summoners/", true, id, false);
@@ -82,7 +69,7 @@ namespace lol_dodge_alert
         /// <returns>If player is in champ-select.</returns>
         public bool is_in_lobby()
         {
-            ValueTuple<string, string> info = new ValueTuple().GetInfo(false);
+            ValueTuple<string, string> info = new ValueTuple().GetInfo();
             dynamic o = api_request(info.Item1, info.Item2, "/lol-gameflow/v1/session/", false, 0, false);
             string p = o.phase;
             switch (p)
@@ -96,42 +83,16 @@ namespace lol_dodge_alert
         }
 
         /// <summary>
-        /// Checks if current game is ranked.
-        /// </summary>
-        /// <returns></returns>
-        public bool isRanked()
-        {
-            ValueTuple<string, string> info = new ValueTuple().GetInfo(false);
-            dynamic o = api_request(info.Item1, info.Item2, "/lol-gameflow/v1/session", false, 0, false);
-            bool p = o.gameData.queue.isRanked;
-            return p;
-        }
-
-        /// <summary>
         /// Add every player from Champion select to "api.lobby_players" for later check.
         /// </summary>
         public void get_players()
         {
-            bool ranked = isRanked();
-
-            if (ranked){
-                ValueTuple<string, string> info = new ValueTuple().GetInfo(true);
-                JObject s = api_request(info.Item1, info.Item2, "/chat/v5/participants/champ-select", false, 0, false);
-                SummonersNew Summoners = JsonConvert.DeserializeObject<SummonersNew>(s.ToString());
-                foreach (var myTm in Summoners.participants)
-                {
-                    lobby_players.Add(myTm.game_name);
-                }
-            }
-            else
+            ValueTuple<string, string> info = new ValueTuple().GetInfo();
+            JObject s = api_request(info.Item1, info.Item2, "/lol-champ-select/v1/session/", false, 0, false);
+            Summoners Summoners = JsonConvert.DeserializeObject<Summoners>(s.ToString());
+            foreach (var myTm in Summoners.myTeam)
             {
-                ValueTuple<string, string> info = new ValueTuple().GetInfo(false);
-                JObject s = api_request(info.Item1, info.Item2, "/lol-champ-select/v1/session/", false, 0, false);
-                Summoners Summoners = JsonConvert.DeserializeObject<Summoners>(s.ToString());
-                foreach (var myTm in Summoners.myTeam)
-                {
-                    lobby_players.Add(get_playername(Convert.ToInt64(myTm.summonerId)));
-                }
+                lobby_players.Add(get_playername(Convert.ToInt64(myTm.summonerId)));
             }
         }
 
